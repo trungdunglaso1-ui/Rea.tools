@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="A REA JavaScript analysis and decoding tool for Electron." />
+    <title>REA Decoder & Analysis Tool</title>
+    <script src="renderer.js" defer></script>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --border-color: #334155;
+        --accent-color: #38bdf8;
+        --accent-hover: #0284c7;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --success-color: #4ade80;
+        --danger-color: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        padding: 24px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 16px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-main);
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 100px;
+        background-color: #090d16;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: #e2e8f0;
+        padding: 10px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        resize: vertical;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
+
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button {
+        background-color: var(--card-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        background-color: var(--border-color);
+      }
+
+      button.primary {
+        background-color: var(--accent-color);
+        color: #0f172a;
+        border: none;
+      }
+
+      button.primary:hover {
+        background-color: var(--accent-hover);
+        color: #fff;
+      }
+
+      .status-box {
+        margin-top: 10px;
+        font-size: 0.875rem;
+        color: var(--success-color);
+        word-break: break-all;
+      }
+
+      /* Notes Table Style */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+      }
+
+      td {
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🔍 REA Analysis & Decoder Tool</h1>
+        <button id="export" type="button" class="primary">Export Notes (CSV)</button>
+      </header>
+
+      <!-- Status Notification -->
+      <p id="status" class="status-box" role="status"></p>
+
+      <!-- Encrypted Payload Decoding Tool Section -->
+      <div class="card">
+        <h2 class="card-title">Bộ giải mã (Decoder Tools)</h2>
+        
+        <div class="form-group">
+          <label for="input-data">Chuỗi mã hóa / Input Payload:</label>
+          <textarea id="input-data" placeholder="Nhập chuỗi mã hóa (Base64, Hex, URL Encoded,...)..."></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="button" id="btn-decode-auto" class="primary">Auto Decode</button>
+          <button type="button" id="btn-decode-b64">Base64 Decode</button>
+          <button type="button" id="btn-decode-hex">Hex Decode</button>
+          <button type="button" id="btn-decode-url">URL Decode</button>
+          <button type="button" id="btn-decode-rot13">ROT13</button>
+          <button type="button" id="btn-clear">Xóa</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="output-data">Kết quả dịch ngược / Decoded Result:</label>
+          <textarea id="output-data" readonly placeholder="Kết quả sẽ hiển thị ở đây..."></textarea>
+        </div>
+      </div>
+
+      <!-- Notes Data Section -->
+      <div class="card">
+        <h2 class="card-title">Danh sách Ghi chú Analysis</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th>Tiêu đề (Title)</th>
+            </tr>
+          </thead>
+          <tbody id="notes-list">
+            <tr>
+              <td>1</td>
+              <td>First note</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
